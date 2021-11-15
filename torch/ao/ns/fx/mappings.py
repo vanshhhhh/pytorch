@@ -195,6 +195,7 @@ def get_base_name_to_sets_of_related_ops() -> Dict[str, Set[NSNodeTargetType]]:
         set([
             nn.Embedding,
             nnq.Embedding,
+            nnqat.Embedding,
         ]),
         # EmbeddingBag
         set([
@@ -502,6 +503,7 @@ def get_node_type_to_io_type_map() -> Dict[str, Set[NSNodeTargetType]]:
         nn.Conv3d,
         nnqat.Conv2d,
         nnqat.Conv3d,
+        nnqat.Embedding,
         nnqat.EmbeddingBag,
         nn.LSTM,
         # note: nnqd.Linear is an instance of nnq.Linear, so this
@@ -564,6 +566,7 @@ def get_node_type_to_io_type_map() -> Dict[str, Set[NSNodeTargetType]]:
         nnq.Hardswish,
         nnq.LeakyReLU,
         nnq.ReLU6,
+        nnq.Embedding,
         nnq.EmbeddingBag,
         nniq.BNReLU2d,
         nniq.BNReLU3d,
