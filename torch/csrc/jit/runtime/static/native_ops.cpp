@@ -484,7 +484,7 @@ REGISTER_NATIVE_OPERATOR_FUNCTOR(
         size_t output_idx = 0;
         for (const auto& tuple : pnode->inputs()) {
           for (auto& elem : tuple->toTupleRef().elements()) {
-            pnode->Output(output_idx) = elem;
+            pnode->Output(output_idx) = createBorrowedIValue(elem);
             ++output_idx;
           }
         }
