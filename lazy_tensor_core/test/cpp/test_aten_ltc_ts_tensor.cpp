@@ -18,11 +18,10 @@ namespace {
 class AtenLtcTsTensorTest : public AtenLtcTsTensorTestBase {};
 
 bool IsCuda() {
-  return compiler::getBackend()->HardwareDeviceType() ==
-         at::kCUDA;
+  return torch::lazy::getBackend()->GetDefaultDeviceType() == at::kCUDA;
 }
 
-compiler::BackendRegistrar g_registrar(compiler::GetTSBackendImpl());
+torch::lazy::BackendRegistrar g_registrar(compiler::GetTSBackendImpl());
 
 }  // namespace
 

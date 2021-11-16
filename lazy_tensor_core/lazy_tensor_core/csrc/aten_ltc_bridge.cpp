@@ -28,8 +28,7 @@ class AtenLtcDeviceMapper {
 
  private:
   AtenLtcDeviceMapper() {
-    for (auto& device_str :
-         compiler::getBackend()->GetLocalDevices()) {
+    for (auto& device : torch::lazy::getBackend()->GetBackendDevices()) {
       // TODO(alanwaketan): The backend should do the mapping themselves, and construct the device accordingly.
       devices_.emplace_back();
       devices_ordinals_[devices_.back()] = devices_.size() - 1;

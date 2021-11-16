@@ -78,6 +78,14 @@ class TORCH_API TSLoweringContext : public LoweringContext {
 
   size_t AddResult(const Output& output) override { TORCH_INTERNAL_ASSERT(false, "not implemented"); }
 
+  void AddParameter(
+      const torch::lazy::Output& output,
+      size_t index,
+      const Shape& shape,
+      const std::string& name) override {
+    TORCH_INTERNAL_ASSERT(false, "not implemented");
+  }
+
   ComputationPtr Build() override { TORCH_INTERNAL_ASSERT(false, "not implemented"); }
 
   // Retrieves the lowered operation for a output. If the requested output is

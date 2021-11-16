@@ -1,6 +1,7 @@
 #include <c10/core/Device.h>
 #include <c10/util/Optional.h>
 #include <torch/csrc/lazy/backend/backend_device.h>
+#include <torch/csrc/lazy/backend/backend_interface.h>
 #include <torch/csrc/lazy/core/ir_util.h>
 
 #include <cstring>
@@ -10,7 +11,6 @@
 #include <vector>
 
 #include "lazy_tensor_core/csrc/aten_ltc_bridge.h"
-#include "lazy_tensor_core/csrc/compiler/backend_impl_interface.h"
 #include "lazy_tensor_core/csrc/helpers.h"
 #include "lazy_tensor_core/csrc/ir_dump_util.h"
 #include "lazy_tensor_core/csrc/lazy_graph_executor.h"
@@ -59,7 +59,7 @@ torch::lazy::BackendDevice GetDeviceOrCurrent(const std::string& device_str) {
 
 void PrepareToExit() {
   //TODO(whc) should we hook this interface up? It does nothing currently
-  compiler::getBackend()->PrepareToExit();
+  torch::lazy::getBackend()->PrepareToExit();
   //TODO(whc) can I call this unconditionally?
   LazyGraphExecutor::Get()->WaitDeviceOps({});
 }
@@ -415,7 +415,7 @@ std::vector<at::Tensor> LtcCreateTensorList(const at::TensorList& tensors) {
 //   {
 //     NoGilSection nogil;
 //     auto device = GetDeviceOrCurrent(device_str);
-//     mem_info = compiler::getBackend()->GetMemoryInfo(
+//     mem_info = torch::lazy::getBackend()->GetMemoryInfo(
 //         device.toString());
 //   }
 //   auto py_dict = py::dict();
@@ -482,12 +482,8 @@ void InitLtcModuleBindings(py::module m) {
         [](const at::Tensor& tensor) { return GetTensorViewAliasId(tensor); });
   m.def("_ltc_get_tensor_id",
         [](const at::Tensor& tensor) { return GetTensorId(tensor); });
-  m.def("_ltc_get_devices", []() {
-    return compiler::getBackend()->GetLocalDevices();
-  });
-  m.def("_ltc_get_all_devices", []() {
-    return compiler::getBackend()->GetAllDevices();
-  });
+  m.def("_ltc_get_devices",
+        []() { return torch::lazy::getBackend()->GetBackendDevices(); });
   m.def("_ltc_real_devices", [](const std::vector<std::string>& devices) {
     std::vector<std::string> ltc_devices;
     {
@@ -495,24 +491,6 @@ void InitLtcModuleBindings(py::module m) {
       ltc_devices = GetLtcDeviceStrings(devices);
     }
     return ltc_devices;
-  });
-  m.def("_ltc_set_replication_devices",
-        [](const std::vector<std::string>& devices) {
-          auto replication_devices =
-              std::make_shared<std::vector<std::string>>(devices);
-          compiler::getBackend()->SetReplicationDevices(
-              std::move(replication_devices));
-        });
-  m.def("_ltc_get_replication_devices", []() {
-    auto replication_devices =
-        compiler::getBackend()->GetReplicationDevices();
-    return replication_devices != nullptr ? *replication_devices
-                                          : std::vector<std::string>();
-  });
-  m.def("_ltc_get_replication_devices_count", []() {
-    auto replication_devices =
-        compiler::getBackend()->GetReplicationDevices();
-    return replication_devices != nullptr ? replication_devices->size() : 0;
   });
 
   py::class_<torch::lazy::Value, std::shared_ptr<torch::lazy::Value>>(
